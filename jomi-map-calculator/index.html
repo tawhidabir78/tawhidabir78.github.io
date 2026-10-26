@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>জমি মাপ ক্যালকুলেটর — জমি সংবাদ</title>
+<meta name="description" content="জমি মাপ ক্যালকুলেটর — কাঠা, শতাংশ, বিঘা, একর, বর্গফুট ও বর্গমিটারে জমির পরিমাণ হিসাব করুন।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #14532d;
+    --green-mid: #1d7040;
+    --green-deep: #0d3b21;
+    --gold: #d97706;
+    --gold-light: #fbbf24;
+    --ink: #16241c;
+    --muted: #5b6b62;
+    --line: #e2eae4;
+    --page: #f4f7f4;
+    --card: #ffffff;
+    --tint: #eaf3ec;
+    --radius: 22px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: 'Hind Siliguri', 'Segoe UI', 'Noto Sans Bengali', system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 16px 32px;
+  }
+
+  /* ---------- Hero header ---------- */
+  header {
+    position: relative;
+    background:
+      radial-gradient(360px 200px at 88% -10%, rgba(251, 191, 36, .22), transparent 70%),
+      linear-gradient(140deg, var(--green) 0%, var(--green-mid) 55%, var(--green-deep) 100%);
+    color: #fff;
+    text-align: center;
+    padding: 32px 20px 46px;
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
+    overflow: hidden;
+  }
+  header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'><g fill='none' stroke='white' stroke-width='1' opacity='0.06'><path d='M0 18h72M0 36h72M0 54h72M18 0v72M36 0v72M54 0v72'/><path d='M0 72L72 0' stroke-width='1.2'/><path d='M-8 36L36 -8M36 80L80 36' stroke-width='0.8'/></g></svg>");
+    background-size: 72px 72px;
+    pointer-events: none;
+  }
+  header > * { position: relative; z-index: 1; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 16px 5px 12px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #3b2504;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 999px;
+    box-shadow: 0 6px 16px rgba(217, 119, 6, .35);
+    margin-bottom: 14px;
+  }
+  .badge svg { width: 16px; height: 16px; flex: none; }
+  header h1 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+  }
+  header .sub {
+    display: block;
+    margin-top: 8px;
+    color: rgba(255, 255, 255, .72);
+    font-size: 16px;
+    font-weight: 500;
+  }
+  @media (min-width: 480px) {
+    header h1 { font-size: 38px; }
+  }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(20, 83, 45, .05), 0 12px 28px rgba(20, 83, 45, .10);
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .card.pull-up {
+    margin-top: -18px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .label-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .label-row .sec-label {
+    flex: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .label-row .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .card h2 {
+    margin: 0 0 4px;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .card .hint {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+
+  /* ---------- Unit chips ---------- */
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 52px;
+    padding: 8px 6px;
+    background: #eef5f0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--green);
+    font-family: inherit;
+    font-size: 15.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .chip svg { width: 18px; height: 18px; flex: none; stroke: currentColor; }
+  .chip:hover { background: #e2efe7; }
+  .chip:active { transform: scale(.97); }
+  .chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, .45);
+  }
+  .chip.selected {
+    background: linear-gradient(150deg, var(--green) 0%, var(--green-mid) 100%);
+    color: #fff;
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px var(--gold-light), 0 8px 18px rgba(20, 83, 45, .30);
+    transform: scale(1.03);
+  }
+  .chip.selected:hover { filter: brightness(1.06); }
+
+  /* ---------- Display-style inputs ---------- */
+  input[type="number"] {
+    width: 100%;
+    min-height: 62px;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--ink);
+    background: #f7faf8;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all .18s ease;
+  }
+  input[type="number"]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, .22);
+    background: #fff;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  input.sm {
+    min-height: 56px;
+    font-size: 22px;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 360px) {
+    .chips { grid-template-columns: repeat(2, 1fr); }
+    .row-2 { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Quick pills ---------- */
+  .quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+  }
+  .quick button {
+    min-height: 36px;
+    padding: 4px 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--green);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .quick button:hover { border-color: var(--gold); color: var(--gold); }
+  .quick button:active { transform: scale(.96); }
+  .quick button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, .4);
+  }
+
+  /* ---------- Results ---------- */
+  .results {
+    margin-top: 18px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: background .3s ease;
+  }
+  .results.pulse {
+    animation: pulseFlash .3s ease;
+  }
+  @keyframes pulseFlash {
+    0% { background: rgba(251, 191, 36, .28); }
+    100% { background: transparent; }
+  }
+  .hero-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px;
+    background: var(--tint);
+  }
+  .hero-result .hr-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--green);
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .hero-result .hr-name::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 4px;
+    background: var(--gold);
+    flex: none;
+  }
+  .hero-result .hr-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    word-break: break-all;
+    line-height: 1.25;
+  }
+  .hero-result .hr-unit {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: .6px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    font-size: 17px;
+    background: #fff;
+    border-top: 1px solid var(--line);
+  }
+  .result-row .result-unit {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .result-row .result-unit::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    opacity: .55;
+    flex: none;
+  }
+  .result-row .result-value {
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  .note {
+    margin: 12px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .note::before { content: "※ "; color: var(--gold); }
+
+  /* ---------- Copy-results button ---------- */
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 14px auto 0;
+    min-height: 42px;
+    padding: 8px 20px;
+    background: #fff;
+    border: 1.5px solid var(--green);
+    border-radius: 999px;
+    color: var(--green);
+    font-family: inherit;
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .copy-btn svg { width: 17px; height: 17px; flex: none; }
+  .copy-btn:hover { background: var(--tint); }
+  .copy-btn:active { transform: scale(.97); }
+  .copy-btn.copied {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .copy-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, .45);
+  }
+
+  /* ---------- Plot preview ---------- */
+  .plot-preview {
+    margin-top: 18px;
+    background: #fbfdfb;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 8px;
+  }
+  .plot-preview svg { display: block; width: 100%; height: auto; }
+
+  /* ---------- CTA ---------- */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 26px 22px;
+    background:
+      radial-gradient(280px 160px at 90% 0%, rgba(251, 191, 36, .18), transparent 70%),
+      linear-gradient(140deg, var(--green) 0%, var(--green-mid) 55%, var(--green-deep) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 12px 28px rgba(20, 83, 45, .22);
+  }
+  .cta p {
+    margin: 0 0 16px;
+    font-size: 17px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, .92);
+  }
+  .cta .phone-big {
+    display: block;
+    margin-top: 6px;
+    color: var(--gold-light);
+    font-size: 30px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    letter-spacing: .5px;
+  }
+  .wa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+    min-height: 54px;
+    padding: 12px 22px;
+    background: #22c55e;
+    color: #fff;
+    font-family: inherit;
+    font-size: 19px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, .38);
+    transition: all .18s ease;
+  }
+  .wa-btn:hover { background: #16a34a; }
+  .wa-btn:active { transform: scale(.98); }
+  .wa-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(251, 191, 36, .7); }
+  .wa-btn svg { width: 24px; height: 24px; flex: none; }
+  @media (min-width: 480px) {
+    .wa-btn { width: auto; }
+  }
+
+  footer.credit {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 24px;
+  }
+
+  /* ---------- Sticky action bar ---------- */
+  .sticky-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    gap: 10px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, .88);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -6px 20px rgba(20, 83, 45, .08);
+  }
+  .sticky-bar a {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 50px;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 999px;
+    transition: all .18s ease;
+  }
+  .sticky-bar a:active { transform: scale(.98); }
+  .sticky-bar a svg { width: 20px; height: 20px; flex: none; }
+  .sticky-bar .btn-call {
+    color: var(--green);
+    background: #fff;
+    border: 1.5px solid var(--green);
+  }
+  .sticky-bar .btn-call:hover { background: #f0f7f2; }
+  .sticky-bar .btn-wa {
+    color: #fff;
+    background: #22c55e;
+    border: 1.5px solid #22c55e;
+    box-shadow: 0 6px 14px rgba(34, 197, 94, .32);
+  }
+  .sticky-bar .btn-wa:hover { background: #16a34a; }
+  .sticky-bar a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(217, 119, 6, .45); }
+
+  /* ---------- Entrance ---------- */
+  .card, .cta {
+    animation: riseIn .45s ease both;
+  }
+  .card:nth-of-type(2) { animation-delay: .07s; }
+  .cta { animation-delay: .14s; }
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .cta { animation: none; }
+    .results.pulse { animation: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>
+    </svg>
+    জমি সংবাদ
+  </span>
+  <h1>জমি মাপ ক্যালকুলেটর</h1>
+  <span class="sub">কাঠা · শতাংশ · বিঘা · একর — সব হিসাব এক জায়গায়</span>
+</header>
+
+<main class="wrap">
+
+  <!-- Unit converter -->
+  <section class="card pull-up" aria-labelledby="convHeading">
+    <div class="label-row">
+      <span class="sec-label">একক রূপান্তর</span>
+      <span class="rule"></span>
+    </div>
+    <h2 id="convHeading">পরিমাণ দিন</h2>
+    <p class="hint">একক বেছে নিন — সব এককে ফলাফল দেখাবে।</p>
+
+    <div class="chips" id="unitChips" role="group" aria-label="একক নির্বাচন করুন">
+      <button type="button" class="chip selected" data-key="katha" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/></svg>
+        কাঠা
+      </button>
+      <button type="button" class="chip" data-key="shotangsho" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+        শতাংশ
+      </button>
+      <button type="button" class="chip" data-key="bigha" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+        বিঘা
+      </button>
+      <button type="button" class="chip" data-key="acre" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4"/><path d="M6 4h11l-2.5 3.5L17 11H6"/></svg>
+        একর
+      </button>
+      <button type="button" class="chip" data-key="sqft" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg>
+        বর্গফুট
+      </button>
+      <button type="button" class="chip" data-key="sqm" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
+        বর্গমিটার
+      </button>
+    </div>
+
+    <div class="field">
+      <label for="convValue">পরিমাণ</label>
+      <input type="number" id="convValue" inputmode="decimal" step="any" value="1" autocomplete="off">
+      <div class="quick" id="quickAmounts" aria-label="দ্রুত পরিমাণ">
+        <button type="button" data-amt="1">1</button>
+        <button type="button" data-amt="3">3</button>
+        <button type="button" data-amt="5">5</button>
+        <button type="button" data-amt="10">10</button>
+        <button type="button" data-amt="20">20</button>
+      </div>
+    </div>
+
+    <div class="results" id="convResults" aria-live="polite"></div>
+    <button type="button" class="copy-btn" id="copyConv">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>ফলাফল কপি করুন</span>
+    </button>
+    <p class="note">ঢাকাসহ সারা দেশে প্রচলিত মান অনুযায়ী হিসাব করা হয়েছে।</p>
+  </section>
+
+  <!-- Plot area from dimensions -->
+  <section class="card" aria-labelledby="areaHeading">
+    <div class="label-row">
+      <span class="sec-label">জমির পরিমাণ হিসাব</span>
+      <span class="rule"></span>
+    </div>
+    <h2 id="areaHeading">দৈর্ঘ্য ও প্রস্থ দিন</h2>
+    <p class="hint">ফুটে দিন — জমির পরিমাণ সব এককে পাবেন।</p>
+
+    <div class="row-2">
+      <div class="field">
+        <label for="lenInput">দৈর্ঘ্য (ফুট)</label>
+        <input type="number" class="sm" id="lenInput" inputmode="decimal" step="any" placeholder="0" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="widInput">প্রস্থ (ফুট)</label>
+        <input type="number" class="sm" id="widInput" inputmode="decimal" step="any" placeholder="0" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="plot-preview" id="plotPreview" aria-hidden="true"></div>
+
+    <div class="results" id="areaResults" aria-live="polite"></div>
+    <button type="button" class="copy-btn" id="copyArea">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>ফলাফল কপি করুন</span>
+    </button>
+    <p class="note">ঢাকাসহ সারা দেশে প্রচলিত মান অনুযায়ী হিসাব করা হয়েছে।</p>
+  </section>
+
+  <!-- Footer CTA -->
+  <section class="cta" aria-label="যোগাযোগ">
+    <p>জমি সংক্রান্ত যেকোনো তথ্য ও পরামর্শের জন্য কল করুন:
+      <a class="phone-big" href="tel:01906305678">01906305678</a>
+    </p>
+    <a class="wa-btn" href="https://wa.me/8801906305678" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.16 8.16 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.17c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.13-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.65 4.2 3.71.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29z"/>
+      </svg>
+      WhatsApp-এ মেসেজ করুন
+    </a>
+  </section>
+
+  <footer class="credit">© জমি সংবাদ</footer>
+
+</main>
+
+<!-- Sticky action bar -->
+<nav class="sticky-bar" aria-label="দ্রুত যোগাযোগ">
+  <a class="btn-call" href="tel:01906305678">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    কল করুন
+  </a>
+  <a class="btn-wa" href="https://wa.me/8801906305678" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.16 8.16 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.17c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.13-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.65 4.2 3.71.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29z"/></svg>
+    WhatsApp
+  </a>
+</nav>
+
+<script>
+(function () {
+  'use strict';
+
+  // Conversion constants — base unit: square feet
+  var UNITS = [
+    { key: 'katha',      name: 'কাঠা',       sqft: 720 },
+    { key: 'shotangsho', name: 'শতাংশ',      sqft: 435.6 },
+    { key: 'bigha',      name: 'বিঘা',       sqft: 14400 },
+    { key: 'acre',       name: 'একর',        sqft: 43560 },
+    { key: 'sqft',       name: 'বর্গফুট',    sqft: 1 },
+    { key: 'sqm',        name: 'বর্গমিটার', sqft: 10.7639 }
+  ];
+
+  var fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 4 });
+
+  function toNumber(value) {
+    var n = parseFloat(value);
+    return isFinite(n) ? n : 0; // empty/invalid input → 0, never NaN
+  }
+
+  function formatNumber(n) {
+    return fmt.format(Math.abs(n) < 1e-15 ? 0 : n);
+  }
+
+  function pulse(el) {
+    el.classList.remove('pulse');
+    void el.offsetWidth; // reflow so the animation restarts
+    el.classList.add('pulse');
+  }
+
+  // Render: featured hero tile for বর্গফুট (base unit), then remaining units as rows.
+  // The selected unit's own value is the input, so it is excluded from the list.
+  function renderResults(container, totalSqft, excludeKey) {
+    var list = [];
+    for (var i = 0; i < UNITS.length; i++) {
+      if (UNITS[i].key === excludeKey) continue;
+      list.push(UNITS[i]);
+    }
+    // Hero tile = sqft when present, otherwise the first remaining unit.
+    var hero = null;
+    for (var j = 0; j < list.length; j++) {
+      if (list[j].key === 'sqft') { hero = list.splice(j, 1)[0]; break; }
+    }
+    if (!hero) hero = list.length ? list.splice(0, 1)[0] : null;
+
+    var html = '';
+    if (hero) {
+      html += '<div class="hero-result">' +
+                '<span class="hr-name">' + hero.name + '</span>' +
+                '<span class="hr-value">' + formatNumber(totalSqft / hero.sqft) +
+                  '<span class="hr-unit">' + hero.name + '</span>' +
+                '</span>' +
+              '</div>';
+    }
+    for (var k = 0; k < list.length; k++) {
+      html += '<div class="result-row">' +
+                '<span class="result-unit">' + list[k].name + '</span>' +
+                '<span class="result-value">' + formatNumber(totalSqft / list[k].sqft) + '</span>' +
+              '</div>';
+    }
+    container.innerHTML = html;
+    pulse(container);
+  }
+
+  // --- Elements ---
+  var convValue = document.getElementById('convValue');
+  var convResults = document.getElementById('convResults');
+  var chipsWrap = document.getElementById('unitChips');
+  var lenInput = document.getElementById('lenInput');
+  var widInput = document.getElementById('widInput');
+  var areaResults = document.getElementById('areaResults');
+  var plotPreview = document.getElementById('plotPreview');
+
+  var selectedUnit = 'katha'; // programmatic selected-unit state
+
+  function sqftPerUnit(key) {
+    for (var i = 0; i < UNITS.length; i++) {
+      if (UNITS[i].key === key) return UNITS[i].sqft;
+    }
+    return 1;
+  }
+
+  function updateConverter() {
+    var value = toNumber(convValue.value);
+    renderResults(convResults, value * sqftPerUnit(selectedUnit), selectedUnit);
+  }
+
+  function updateArea() {
+    var length = toNumber(lenInput.value);
+    var width = toNumber(widInput.value);
+    renderResults(areaResults, length * width, null); // dimensions are in feet
+    renderPlotPreview(length, width);
+  }
+
+  // --- Unit chips ---
+  chipsWrap.addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip');
+    if (!btn) return;
+    selectedUnit = btn.getAttribute('data-key');
+    var all = chipsWrap.querySelectorAll('.chip');
+    for (var i = 0; i < all.length; i++) {
+      var on = all[i] === btn;
+      all[i].classList.toggle('selected', on);
+      all[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    updateConverter();
+  });
+
+  // --- Quick-amount pills ---
+  document.getElementById('quickAmounts').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-amt]');
+    if (!btn) return;
+    convValue.value = btn.getAttribute('data-amt');
+    updateConverter();
+  });
+
+  // --- Live SVG plot preview ---
+  var VB_W = 320, VB_H = 224, MAX_W = 214, MAX_H = 128;
+  var CENTER_X = 176, CENTER_Y = 128; // leaves room for left-edge label
+
+  function renderPlotPreview(len, wid) {
+    var cx = CENTER_X, cy = CENTER_Y;
+
+    if (len <= 0 && wid <= 0) {
+      var pw = 200, ph = 110;
+      plotPreview.innerHTML =
+        '<svg viewBox="0 0 ' + VB_W + ' ' + VB_H + '" xmlns="http://www.w3.org/2000/svg">' +
+          '<rect x="' + (cx - pw / 2) + '" y="' + (cy - ph / 2) + '" width="' + pw + '" height="' + ph + '" rx="14" ' +
+            'fill="#f2f7f3" stroke="#9dbdaa" stroke-width="2" stroke-dasharray="7 6"/>' +
+          '<text x="' + cx + '" y="' + cy + '" text-anchor="middle" dominant-baseline="middle" ' +
+            'font-family="Hind Siliguri, sans-serif" font-size="15" fill="#5b6b62">দৈর্ঘ্য ও প্রস্থ দিন</text>' +
+        '</svg>';
+      return;
+    }
+
+    // Aspect ratio from length:width, clamped between 1:3 and 3:1
+    var ratio = (wid > 0) ? (len > 0 ? len / wid : 3) : (1 / 3);
+    if (ratio > 3) ratio = 3;
+    if (ratio < 1 / 3) ratio = 1 / 3;
+
+    var w = Math.min(MAX_W, MAX_H * ratio);
+    var h = w / ratio;
+    var x = cx - w / 2;
+    var y = cy - h / 2;
+
+    var katha = formatNumber((len * wid) / 720);
+    var valSize = w < 110 ? 15 : (w < 160 ? 19 : 24); // keep the area text inside narrow plots
+    var capSize = w < 110 ? 10.5 : 12.5;
+
+    plotPreview.innerHTML =
+      '<svg viewBox="0 0 ' + VB_W + ' ' + VB_H + '" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="14" ' +
+          'fill="#eaf3ec" stroke="#d97706" stroke-width="2"/>' +
+        '<text x="' + cx + '" y="' + (y - 12) + '" text-anchor="middle" ' +
+          'font-family="Hind Siliguri, sans-serif" font-size="14" font-weight="600" fill="#14532d">দৈর্ঘ্য: ' + formatNumber(len) + ' ফুট</text>' +
+        '<text x="' + (x - 14) + '" y="' + cy + '" text-anchor="middle" ' +
+          'transform="rotate(-90 ' + (x - 14) + ' ' + cy + ')" ' +
+          'font-family="Hind Siliguri, sans-serif" font-size="14" font-weight="600" fill="#14532d">প্রস্থ: ' + formatNumber(wid) + ' ফুট</text>' +
+        '<text x="' + cx + '" y="' + (cy - 14) + '" text-anchor="middle" ' +
+          'font-family="Hind Siliguri, sans-serif" font-size="' + capSize + '" font-weight="600" fill="#5b6b62">মোট জমি</text>' +
+        '<text x="' + cx + '" y="' + (cy + 12) + '" text-anchor="middle" ' +
+          'font-family="Hind Siliguri, sans-serif" font-size="' + valSize + '" font-weight="700" fill="#14532d">' + katha + ' কাঠা</text>' +
+      '</svg>';
+  }
+
+  // --- Copy results as shareable text ---
+  function unitName(key) {
+    for (var i = 0; i < UNITS.length; i++) {
+      if (UNITS[i].key === key) return UNITS[i].name;
+    }
+    return '';
+  }
+
+  function resultsText(titleLine, totalSqft) {
+    var lines = [titleLine];
+    for (var i = 0; i < UNITS.length; i++) {
+      lines.push(UNITS[i].name + ': ' + formatNumber(totalSqft / UNITS[i].sqft));
+    }
+    lines.push('— জমি সংবাদ | জমি মাপ ক্যালকুলেটর');
+    lines.push('যোগাযোগ: 01906305678');
+    return lines.join('\n');
+  }
+
+  function copyFeedback(btn) {
+    var label = btn.querySelector('span');
+    var original = label ? label.textContent : '';
+    btn.classList.add('copied');
+    if (label) label.textContent = 'কপি হয়েছে ✓';
+    setTimeout(function () {
+      btn.classList.remove('copied');
+      if (label) label.textContent = original;
+    }, 1600);
+  }
+
+  function copyToClipboard(text, btn) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      copyFeedback(btn);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { copyFeedback(btn); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  var copyConv = document.getElementById('copyConv');
+  var copyArea = document.getElementById('copyArea');
+
+  copyConv.addEventListener('click', function () {
+    var value = toNumber(convValue.value);
+    var total = value * sqftPerUnit(selectedUnit);
+    var title = 'জমির পরিমাণ: ' + formatNumber(value) + ' ' + unitName(selectedUnit);
+    copyToClipboard(resultsText(title, total), copyConv);
+  });
+
+  copyArea.addEventListener('click', function () {
+    var length = toNumber(lenInput.value);
+    var width = toNumber(widInput.value);
+    var title = 'জমির পরিমাণ (দৈর্ঘ্য ' + formatNumber(length) + ' ফুট × প্রস্থ ' + formatNumber(width) + ' ফুট)';
+    copyToClipboard(resultsText(title, length * width), copyArea);
+  });
+
+  convValue.addEventListener('input', updateConverter);
+  lenInput.addEventListener('input', updateArea);
+  widInput.addEventListener('input', updateArea);
+
+  updateConverter();
+  updateArea();
+})();
+</script>
+
+</body>
+</html>
