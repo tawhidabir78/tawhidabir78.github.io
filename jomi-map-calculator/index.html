@@ -196,6 +196,46 @@
   }
   .chip.selected:hover { filter: brightness(1.06); }
 
+  /* ---------- Shape chips + method note (v3: polygon modes) ---------- */
+  .chips.shapes {
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 14px;
+  }
+  .chips.shapes .chip { min-height: 46px; font-size: 15px; }
+  .shape-note {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    line-height: 1.55;
+    background: var(--tint);
+    border: 1px solid var(--line);
+    color: var(--green);
+  }
+  .shape-note.warn {
+    background: #fef8e7;
+    border-color: #f0dfa8;
+    color: #7c5a06;
+  }
+  .shape-note.err {
+    background: #fdf0ef;
+    border-color: #f0c4bf;
+    color: #8c2f26;
+  }
+  .shape-note strong { font-weight: 700; }
+  .field-note {
+    margin: -6px 0 14px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .results-hint {
+    padding: 16px;
+    font-size: 16px;
+    color: var(--muted);
+    text-align: center;
+    background: #fff;
+  }
+
   /* ---------- Display-style inputs ---------- */
   input[type="number"] {
     width: 100%;
@@ -615,9 +655,18 @@
       <span class="sec-label">জমির পরিমাণ হিসাব</span>
       <span class="rule"></span>
     </div>
-    <h2 id="areaHeading">দৈর্ঘ্য ও প্রস্থ দিন</h2>
-    <p class="hint">ফুটে দিন — জমির পরিমাণ সব এককে পাবেন।</p>
+    <h2 id="areaHeading">জমির আকৃতি বেছে নিন</h2>
+    <p class="hint">আকৃতি অনুযায়ী বাহুর মাপ দিন — সব মাপ ফুটে।</p>
 
+    <div class="chips shapes" id="shapeChips" role="group" aria-label="জমির আকৃতি নির্বাচন করুন">
+      <button type="button" class="chip selected" data-shape="rect" aria-pressed="true">আয়তক্ষেত্র</button>
+      <button type="button" class="chip" data-shape="tri" aria-pressed="false">ত্রিভুজ (৩ বাহু)</button>
+      <button type="button" class="chip" data-shape="quad" aria-pressed="false">চতুর্ভুজ (৪ বাহু)</button>
+      <button type="button" class="chip" data-shape="penta" aria-pressed="false">পঞ্চভুজ (৫ বাহু)</button>
+      <button type="button" class="chip" data-shape="hexa" aria-pressed="false">ষড়ভুজ (৬ বাহু)</button>
+    </div>
+
+    <div id="rectFields">
     <div class="row-2">
       <div class="field">
         <label for="lenInput">দৈর্ঘ্য (ফুট)</label>
@@ -628,6 +677,10 @@
         <input type="number" class="sm" id="widInput" inputmode="decimal" step="any" placeholder="0" autocomplete="off">
       </div>
     </div>
+    </div>
+
+    <div id="polyFields" hidden></div>
+    <div id="shapeNote" class="shape-note" hidden></div>
 
     <div class="plot-preview" id="plotPreview" aria-hidden="true"></div>
 
@@ -756,12 +809,221 @@
     renderResults(convResults, value * sqftPerUnit(selectedUnit), selectedUnit);
   }
 
-  function updateArea() {
-    var length = toNumber(lenInput.value);
-    var width = toNumber(widInput.value);
-    renderResults(areaResults, length * width, null); // dimensions are in feet
-    renderPlotPreview(length, width);
+  // --- Shape modes (v3): rectangle / triangle / quadrilateral / pentagon / hexagon ---
+  var SHAPES = {
+    rect:  { sides: 0, diags: 0, name: 'আয়তক্ষেত্র' },
+    tri:   { sides: 3, diags: 0, name: 'ত্রিভুজ' },
+    quad:  { sides: 4, diags: 1, name: 'চতুর্ভুজ' },
+    penta: { sides: 5, diags: 2, name: 'পঞ্চভুজ' },
+    hexa:  { sides: 6, diags: 3, name: 'ষড়ভুজ' }
+  };
+  var BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  function bnNum(n) {
+    return String(n).replace(/[0-9]/g, function (d) { return BN_DIGITS[+d]; });
   }
+
+  var currentShape = 'rect';
+  var shapeChips = document.getElementById('shapeChips');
+  var rectFields = document.getElementById('rectFields');
+  var polyFields = document.getElementById('polyFields');
+  var shapeNote = document.getElementById('shapeNote');
+
+  // Heron: exact triangle area from 3 sides; NaN when the sides cannot form a triangle.
+  function heron(a, b, c) {
+    if (!(a > 0 && b > 0 && c > 0)) return NaN;
+    if (a + b <= c || b + c <= a || c + a <= b) return NaN;
+    var s = (a + b + c) / 2;
+    var v = s * (s - a) * (s - b) * (s - c);
+    return v <= 0 ? 0 : Math.sqrt(v);
+  }
+
+  // Fan triangulation from vertex 0: n sides need n-3 diagonals.
+  // Triangles: (s0,s1,d1), (d1,s2,d2), ..., (d(n-3), s(n-2), s(n-1)).
+  function fanArea(sides, diags) {
+    var n = sides.length;
+    var tris = [[sides[0], sides[1], diags[0]]];
+    for (var i = 1; i <= n - 4; i++) tris.push([diags[i - 1], sides[i + 1], diags[i]]);
+    tris.push([diags[n - 4], sides[n - 2], sides[n - 1]]);
+    var sum = 0;
+    for (var j = 0; j < tris.length; j++) {
+      var a = heron(tris[j][0], tris[j][1], tris[j][2]);
+      if (isNaN(a)) return NaN;
+      sum += a;
+    }
+    return sum;
+  }
+
+  function readPolyInputs() {
+    var sides = [], diags = [];
+    var sEls = polyFields.querySelectorAll('[data-side]');
+    var dEls = polyFields.querySelectorAll('[data-diag]');
+    for (var i = 0; i < sEls.length; i++) sides.push(toNumber(sEls[i].value));
+    for (var j = 0; j < dEls.length; j++) diags.push(toNumber(dEls[j].value));
+    return { sides: sides, diags: diags };
+  }
+
+  function setNote(html, kind) {
+    if (!html) { shapeNote.hidden = true; shapeNote.innerHTML = ''; return; }
+    shapeNote.hidden = false;
+    shapeNote.className = 'shape-note' + (kind ? ' ' + kind : '');
+    shapeNote.innerHTML = html;
+  }
+
+  function showHint(msg) {
+    areaResults.innerHTML = '<div class="results-hint">' + msg + '</div>';
+  }
+
+  function renderPolyFields() {
+    var cfg = SHAPES[currentShape];
+    if (currentShape === 'rect') { polyFields.innerHTML = ''; return; }
+    var html = '<div class="row-2">';
+    for (var i = 0; i < cfg.sides; i++) {
+      html += '<div class="field"><label>বাহু ' + bnNum(i + 1) + ' (ফুট)</label>' +
+        '<input type="number" class="sm" data-side inputmode="decimal" step="any" placeholder="0" autocomplete="off"></div>';
+    }
+    html += '</div>';
+    if (cfg.diags > 0) {
+      if (currentShape === 'quad') {
+        html += '<p class="field-note">কর্ণ (ঐচ্ছিক): ১ নম্বর কোণা থেকে ৩ নম্বর কোণা পর্যন্ত মাপ। কর্ণ দিলে একদম সঠিক হিসাব হবে; না দিলে গড় পদ্ধতির আনুমানিক ফলাফল দেখাবে।</p>';
+      } else {
+        html += '<p class="field-note">কর্ণের মাপ: ১ নম্বর কোণা থেকে মাপুন (ছকে ছকা রেখা দেখুন)। কর্ণ ছাড়া একদম সঠিক হিসাব সম্ভব নয়।</p>';
+      }
+      html += '<div class="row-2">';
+      for (var k = 0; k < cfg.diags; k++) {
+        var label = currentShape === 'quad'
+          ? 'কর্ণ (ঐচ্ছিক) (ফুট)'
+          : 'কর্ণ ' + bnNum(k + 1) + ' (কোণা ১–' + bnNum(k + 3) + ') (ফুট)';
+        html += '<div class="field"><label>' + label + '</label>' +
+          '<input type="number" class="sm" data-diag inputmode="decimal" step="any" placeholder="0" autocomplete="off"></div>';
+      }
+      html += '</div>';
+    }
+    polyFields.innerHTML = html;
+  }
+
+  // Returns {status:'ok', sqft, method, approx} | {status:'incomplete'|'incomplete-diags'|'invalid'}
+  function computePolyTotal(sides, diags) {
+    var cfg = SHAPES[currentShape];
+    var sidesDone = sides.length === cfg.sides && sides.every(function (v) { return v > 0; });
+    if (!sidesDone) return { status: 'incomplete' };
+    if (currentShape === 'tri') {
+      var t = heron(sides[0], sides[1], sides[2]);
+      if (isNaN(t)) return { status: 'invalid' };
+      return { status: 'ok', sqft: t, method: 'হেরনের সূত্রে হিসাব', approx: false };
+    }
+    if (currentShape === 'quad') {
+      if (diags.length > 0 && diags[0] > 0) {
+        var q = fanArea(sides, diags);
+        if (isNaN(q)) return { status: 'invalid' };
+        return { status: 'ok', sqft: q, method: 'কর্ণ দিয়ে ২টি ত্রিভুজে ভাগ করে হিসাব', approx: false };
+      }
+      return { status: 'ok', sqft: ((sides[0] + sides[2]) / 2) * ((sides[1] + sides[3]) / 2), method: 'গড় পদ্ধতিতে হিসাব (বিপরীত বাহুর গড় × গড়)', approx: true };
+    }
+    var diagsDone = diags.length === cfg.diags && diags.every(function (v) { return v > 0; });
+    if (!diagsDone) return { status: 'incomplete-diags' };
+    var p = fanArea(sides, diags);
+    if (isNaN(p)) return { status: 'invalid' };
+    return { status: 'ok', sqft: p, method: 'কর্ণ দিয়ে ত্রিভুজে ভাগ করে হিসাব', approx: false };
+  }
+
+  function updateShape() {
+    var input = readPolyInputs();
+    var res = computePolyTotal(input.sides, input.diags);
+    if (res.status === 'incomplete') {
+      setNote('', null);
+      showHint('সবগুলো বাহুর মাপ দিন — ফলাফল এখানে দেখাবে।');
+    } else if (res.status === 'incomplete-diags') {
+      var need = SHAPES[currentShape].diags === 2 ? '২টি কর্ণের' : '৩টি কর্ণের';
+      setNote('<strong>কর্ণের মাপ লাগবে।</strong> শুধু বাহুর মাপ দিয়ে একদম সঠিক ক্ষেত্রফল বের করা যায় না — একই বাহুতে নানা আকৃতি হতে পারে। ১ নম্বর কোণা থেকে ' + need + ' মাপ ফিতা দিয়ে মেপে দিন (ছকে ছকা রেখা দেখুন)।', 'warn');
+      showHint('কর্ণের মাপ দিলে সঠিক ফলাফল এখানে দেখাবে।');
+    } else if (res.status === 'invalid') {
+      var invMsg = currentShape === 'tri'
+        ? '<strong>মাপ মিলছে না।</strong> এই তিন বাহু দিয়ে ত্রিভুজ তৈরি হয় না — মাপ আবার দেখুন।'
+        : '<strong>মাপ মিলছে না।</strong> এই বাহু ও কর্ণ দিয়ে আকৃতি তৈরি হয় না — মাপ আবার দেখুন।';
+      setNote(invMsg, 'err');
+      showHint('সঠিক মাপ দিলে ফলাফল এখানে দেখাবে।');
+    } else {
+      var extra = res.approx ? ' কর্ণের মাপ দিলে একদম সঠিক হিসাব হবে।' : '';
+      setNote('<strong>' + (res.approx ? 'আনুমানিক ফলাফল' : 'সঠিক ফলাফল') + '</strong> — ' + res.method + '।' + extra, res.approx ? 'warn' : null);
+      renderResults(areaResults, res.sqft, null);
+    }
+    renderPolyPreview(input.sides, input.diags, res.status === 'ok');
+  }
+
+  // Schematic polygon preview (not to scale): vertex numbers outside, side values inside.
+  function renderPolyPreview(sides, diags, filled) {
+    var cfg = SHAPES[currentShape];
+    var n = cfg.sides;
+    var cx = 168, cy = 122, R = 76;
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var ang = -Math.PI / 2 + (2 * Math.PI * i) / n;
+      pts.push([cx + R * Math.cos(ang), cy + R * Math.sin(ang)]);
+    }
+    var poly = pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    var svg = '<svg viewBox="0 0 320 224" xmlns="http://www.w3.org/2000/svg">';
+    svg += '<polygon points="' + poly + '" fill="' + (filled ? '#eaf3ec' : '#f2f7f3') +
+      '" stroke="#d97706" stroke-width="2" stroke-linejoin="round"' + (filled ? '' : ' stroke-dasharray="7 6"') + '/>';
+    if (cfg.diags > 0) {
+      for (var d = 0; d < cfg.diags; d++) {
+        var q = pts[d + 2];
+        svg += '<line x1="' + pts[0][0].toFixed(1) + '" y1="' + pts[0][1].toFixed(1) +
+          '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) +
+          '" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 4"/>';
+      }
+    }
+    for (var v = 0; v < n; v++) {
+      var p = pts[v];
+      var dx = p[0] - cx, dy = p[1] - cy;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var lx = p[0] + (dx / len) * 15, ly = p[1] + (dy / len) * 15;
+      svg += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="middle" ' +
+        'font-family="Hind Siliguri, sans-serif" font-size="13" font-weight="700" fill="#14532d">' + bnNum(v + 1) + '</text>';
+      var p2 = pts[(v + 1) % n];
+      var mx = (p[0] + p2[0]) / 2, my = (p[1] + p2[1]) / 2;
+      var ox = mx - cx, oy = my - cy;
+      var ol = Math.sqrt(ox * ox + oy * oy) || 1;
+      var tx = mx - (ox / ol) * 14, ty = my - (oy / ol) * 14;
+      var val = sides[v] > 0 ? formatNumber(sides[v]) : '—';
+      svg += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle" dominant-baseline="middle" ' +
+        'font-family="Hind Siliguri, sans-serif" font-size="12" font-weight="600" fill="#5b6b62">' + val + '</text>';
+    }
+    svg += '<text x="' + cx + '" y="214" text-anchor="middle" ' +
+      'font-family="Hind Siliguri, sans-serif" font-size="12" fill="#5b6b62">ছকটি আনুমানিক আকৃতি — সংখ্যা কোণা, মান ফুটে</text>';
+    svg += '</svg>';
+    plotPreview.innerHTML = svg;
+  }
+
+  function updateArea() {
+    if (currentShape === 'rect') {
+      var length = toNumber(lenInput.value);
+      var width = toNumber(widInput.value);
+      renderResults(areaResults, length * width, null); // dimensions are in feet
+      renderPlotPreview(length, width);
+      return;
+    }
+    updateShape();
+  }
+
+  // --- Shape chips ---
+  shapeChips.addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip');
+    if (!btn) return;
+    currentShape = btn.getAttribute('data-shape');
+    var all = shapeChips.querySelectorAll('.chip');
+    for (var i = 0; i < all.length; i++) {
+      var on = all[i] === btn;
+      all[i].classList.toggle('selected', on);
+      all[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    var isRect = currentShape === 'rect';
+    rectFields.hidden = !isRect;
+    polyFields.hidden = isRect;
+    if (isRect) { setNote('', null); } else { renderPolyFields(); }
+    updateArea();
+  });
+
+  polyFields.addEventListener('input', updateShape);
 
   // --- Unit chips ---
   chipsWrap.addEventListener('click', function (e) {
@@ -893,10 +1155,35 @@
   });
 
   copyArea.addEventListener('click', function () {
-    var length = toNumber(lenInput.value);
-    var width = toNumber(widInput.value);
-    var title = 'জমির পরিমাণ (দৈর্ঘ্য ' + formatNumber(length) + ' ফুট × প্রস্থ ' + formatNumber(width) + ' ফুট)';
-    copyToClipboard(resultsText(title, length * width), copyArea);
+    if (currentShape === 'rect') {
+      var length = toNumber(lenInput.value);
+      var width = toNumber(widInput.value);
+      var title = 'জমির পরিমাণ (দৈর্ঘ্য ' + formatNumber(length) + ' ফুট × প্রস্থ ' + formatNumber(width) + ' ফুট)';
+      copyToClipboard(resultsText(title, length * width), copyArea);
+      return;
+    }
+    var cfg = SHAPES[currentShape];
+    var input = readPolyInputs();
+    var res = computePolyTotal(input.sides, input.diags);
+    var lines = ['জমির পরিমাণ (' + cfg.name + ' — ' + bnNum(cfg.sides) + ' বাহু' +
+      (cfg.diags > 0 ? ' + ' + bnNum(cfg.diags) + ' কর্ণ' : '') + ')'];
+    for (var i = 0; i < input.sides.length; i++) {
+      lines.push('বাহু ' + bnNum(i + 1) + ': ' + formatNumber(input.sides[i]) + ' ফুট');
+    }
+    for (var j = 0; j < input.diags.length; j++) {
+      if (input.diags[j] > 0) lines.push('কর্ণ ' + bnNum(j + 1) + ': ' + formatNumber(input.diags[j]) + ' ফুট');
+    }
+    if (res.status === 'ok') {
+      lines.push('পদ্ধতি: ' + res.method + (res.approx ? ' (আনুমানিক)' : ' (সঠিক)'));
+      for (var k = 0; k < UNITS.length; k++) {
+        lines.push(UNITS[k].name + ': ' + formatNumber(res.sqft / UNITS[k].sqft));
+      }
+    } else {
+      lines.push('ফলাফল: হিসাবের জন্য সব মাপ (ও কর্ণ) সঠিকভাবে দিন।');
+    }
+    lines.push('— জমি সংবাদ | জমি মাপ ক্যালকুলেটর');
+    lines.push('যোগাযোগ: 01906305678');
+    copyToClipboard(lines.join('\n'), copyArea);
   });
 
   convValue.addEventListener('input', updateConverter);
