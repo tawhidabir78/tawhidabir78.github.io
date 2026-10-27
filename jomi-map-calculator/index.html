@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>try{var __t=localStorage.getItem('jomi-theme');if(__t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(__e){}</script>
 <style>
   :root {
     --green: #14532d;
@@ -22,6 +23,44 @@
     --card: #ffffff;
     --tint: #eaf3ec;
     --radius: 22px;
+    --field: #f7faf8;
+    --chip-bg: #eef5f0;
+    --chip-hover: #e2efe7;
+    --warn-bg: #fef8e7;
+    --warn-line: #f0dfa8;
+    --warn-ink: #7c5a06;
+    --err-bg: #fdf0ef;
+    --err-line: #f0c4bf;
+    --err-ink: #8c2f26;
+    --sticky: rgba(255, 255, 255, .88);
+    --plot-bg: #fbfdfb;
+    --call-hover: #f0f7f2;
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #e9f1eb;
+    --muted: #9db0a4;
+    --line: #2b3b31;
+    --page: #0e1511;
+    --card: #182420;
+    --tint: #1d2d24;
+    --green: #4cc47f;
+    --green-mid: #2f9e5f;
+    --green-deep: #1d7040;
+    --field: #1f2e26;
+    --chip-bg: #203026;
+    --chip-hover: #2a3d2f;
+    --warn-bg: #2e2a16;
+    --warn-line: #6b5d2a;
+    --warn-ink: #f2d98c;
+    --err-bg: #331d1a;
+    --err-line: #6e3530;
+    --err-ink: #f2a89e;
+    --sticky: rgba(14, 21, 17, .88);
+    --plot-bg: #14201a;
+    --call-hover: #1f2e26;
   }
 
   * { box-sizing: border-box; }
@@ -170,7 +209,7 @@
     gap: 7px;
     min-height: 52px;
     padding: 8px 6px;
-    background: #eef5f0;
+    background: var(--chip-bg);
     border: 1px solid var(--line);
     border-radius: 14px;
     color: var(--green);
@@ -181,7 +220,7 @@
     transition: all .15s ease;
   }
   .chip svg { width: 18px; height: 18px; flex: none; stroke: currentColor; }
-  .chip:hover { background: #e2efe7; }
+  .chip:hover { background: var(--chip-hover); }
   .chip:active { transform: scale(.97); }
   .chip:focus-visible {
     outline: none;
@@ -213,14 +252,14 @@
     color: var(--green);
   }
   .shape-note.warn {
-    background: #fef8e7;
-    border-color: #f0dfa8;
-    color: #7c5a06;
+    background: var(--warn-bg);
+    border-color: var(--warn-line);
+    color: var(--warn-ink);
   }
   .shape-note.err {
-    background: #fdf0ef;
-    border-color: #f0c4bf;
-    color: #8c2f26;
+    background: var(--err-bg);
+    border-color: var(--err-line);
+    color: var(--err-ink);
   }
   .shape-note strong { font-weight: 700; }
   .field-note {
@@ -233,7 +272,7 @@
     font-size: 16px;
     color: var(--muted);
     text-align: center;
-    background: #fff;
+    background: var(--card);
   }
 
   /* ---------- Display-style inputs ---------- */
@@ -247,7 +286,7 @@
     font-variant-numeric: tabular-nums;
     text-align: right;
     color: var(--ink);
-    background: #f7faf8;
+    background: var(--field);
     border: 1.5px solid var(--line);
     border-radius: 14px;
     outline: none;
@@ -258,7 +297,7 @@
   input[type="number"]:focus {
     border-color: var(--gold);
     box-shadow: 0 0 0 3px rgba(217, 119, 6, .22);
-    background: #fff;
+    background: var(--card);
   }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button {
@@ -292,7 +331,7 @@
   .quick button {
     min-height: 36px;
     padding: 4px 16px;
-    background: #fff;
+    background: var(--card);
     border: 1px solid var(--line);
     border-radius: 999px;
     color: var(--green);
@@ -372,7 +411,7 @@
     gap: 12px;
     padding: 12px 16px;
     font-size: 17px;
-    background: #fff;
+    background: var(--card);
     border-top: 1px solid var(--line);
   }
   .result-row .result-unit {
@@ -416,7 +455,7 @@
     margin: 14px auto 0;
     min-height: 42px;
     padding: 8px 20px;
-    background: #fff;
+    background: var(--card);
     border: 1.5px solid var(--green);
     border-radius: 999px;
     color: var(--green);
@@ -442,7 +481,7 @@
   /* ---------- Plot preview ---------- */
   .plot-preview {
     margin-top: 18px;
-    background: #fbfdfb;
+    background: var(--plot-bg);
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 8px;
@@ -523,7 +562,7 @@
     display: flex;
     gap: 10px;
     padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, .88);
+    background: var(--sticky);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--line);
@@ -548,10 +587,10 @@
   .sticky-bar a svg { width: 20px; height: 20px; flex: none; }
   .sticky-bar .btn-call {
     color: var(--green);
-    background: #fff;
+    background: var(--card);
     border: 1.5px solid var(--green);
   }
-  .sticky-bar .btn-call:hover { background: #f0f7f2; }
+  .sticky-bar .btn-call:hover { background: var(--call-hover); }
   .sticky-bar .btn-wa {
     color: #fff;
     background: #22c55e;
@@ -571,6 +610,37 @@
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* ---------- Theme toggle (top corner) ---------- */
+  .theme-toggle {
+    position: fixed;
+    top: 10px;
+    right: 12px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 7px 14px;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .18s ease;
+  }
+  .theme-toggle:active { transform: scale(.96); }
+  .theme-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(217, 119, 6, .5); }
+  .theme-toggle .tt-icon { font-size: 16px; line-height: 1; }
+  @media (max-width: 479px) {
+    .theme-toggle { padding: 7px 10px; }
+    .theme-toggle .tt-label { display: none; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card, .cta { animation: none; }
     .results.pulse { animation: none; }
@@ -579,6 +649,10 @@
 </style>
 </head>
 <body>
+
+<button type="button" class="theme-toggle" id="themeToggle" aria-label="ডার্ক মোড চালু করুন">
+  <span class="tt-icon" aria-hidden="true">🌙</span><span class="tt-label">ডার্ক মোড</span>
+</button>
 
 <header>
   <span class="badge">
@@ -953,6 +1027,11 @@
   // Schematic polygon preview (not to scale): vertex numbers outside, side values inside.
   function renderPolyPreview(sides, diags, filled) {
     var cfg = SHAPES[currentShape];
+    var darkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    var palFill = darkMode ? '#1c2b21' : '#eaf3ec';
+    var palEmpty = darkMode ? '#182420' : '#f2f7f3';
+    var palLab = darkMode ? '#7fd6a4' : '#14532d';
+    var palMut = darkMode ? '#9db0a4' : '#5b6b62';
     var n = cfg.sides;
     var cx = 168, cy = 122, R = 76;
     var pts = [];
@@ -962,7 +1041,7 @@
     }
     var poly = pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
     var svg = '<svg viewBox="0 0 320 224" xmlns="http://www.w3.org/2000/svg">';
-    svg += '<polygon points="' + poly + '" fill="' + (filled ? '#eaf3ec' : '#f2f7f3') +
+    svg += '<polygon points="' + poly + '" fill="' + (filled ? palFill : palEmpty) +
       '" stroke="#d97706" stroke-width="2" stroke-linejoin="round"' + (filled ? '' : ' stroke-dasharray="7 6"') + '/>';
     if (cfg.diags > 0) {
       for (var d = 0; d < cfg.diags; d++) {
@@ -978,7 +1057,7 @@
       var len = Math.sqrt(dx * dx + dy * dy) || 1;
       var lx = p[0] + (dx / len) * 15, ly = p[1] + (dy / len) * 15;
       svg += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="middle" ' +
-        'font-family="Hind Siliguri, sans-serif" font-size="13" font-weight="700" fill="#14532d">' + bnNum(v + 1) + '</text>';
+        'font-family="Hind Siliguri, sans-serif" font-size="13" font-weight="700" fill="' + palLab + '">' + bnNum(v + 1) + '</text>';
       var p2 = pts[(v + 1) % n];
       var mx = (p[0] + p2[0]) / 2, my = (p[1] + p2[1]) / 2;
       var ox = mx - cx, oy = my - cy;
@@ -986,10 +1065,10 @@
       var tx = mx - (ox / ol) * 14, ty = my - (oy / ol) * 14;
       var val = sides[v] > 0 ? formatNumber(sides[v]) : '—';
       svg += '<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle" dominant-baseline="middle" ' +
-        'font-family="Hind Siliguri, sans-serif" font-size="12" font-weight="600" fill="#5b6b62">' + val + '</text>';
+        'font-family="Hind Siliguri, sans-serif" font-size="12" font-weight="600" fill="' + palMut + '">' + val + '</text>';
     }
     svg += '<text x="' + cx + '" y="214" text-anchor="middle" ' +
-      'font-family="Hind Siliguri, sans-serif" font-size="12" fill="#5b6b62">ছকটি আনুমানিক আকৃতি — সংখ্যা কোণা, মান ফুটে</text>';
+      'font-family="Hind Siliguri, sans-serif" font-size="12" fill="' + palMut + '">ছকটি আনুমানিক আকৃতি — সংখ্যা কোণা, মান ফুটে</text>';
     svg += '</svg>';
     plotPreview.innerHTML = svg;
   }
@@ -1053,15 +1132,21 @@
 
   function renderPlotPreview(len, wid) {
     var cx = CENTER_X, cy = CENTER_Y;
+    var darkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    var palFill = darkMode ? '#1c2b21' : '#eaf3ec';
+    var palEmpty = darkMode ? '#182420' : '#f2f7f3';
+    var palLab = darkMode ? '#7fd6a4' : '#14532d';
+    var palMut = darkMode ? '#9db0a4' : '#5b6b62';
+    var palDash = darkMode ? '#4a5f52' : '#9dbdaa';
 
     if (len <= 0 && wid <= 0) {
       var pw = 200, ph = 110;
       plotPreview.innerHTML =
         '<svg viewBox="0 0 ' + VB_W + ' ' + VB_H + '" xmlns="http://www.w3.org/2000/svg">' +
           '<rect x="' + (cx - pw / 2) + '" y="' + (cy - ph / 2) + '" width="' + pw + '" height="' + ph + '" rx="14" ' +
-            'fill="#f2f7f3" stroke="#9dbdaa" stroke-width="2" stroke-dasharray="7 6"/>' +
+            'fill="' + palEmpty + '" stroke="' + palDash + '" stroke-width="2" stroke-dasharray="7 6"/>' +
           '<text x="' + cx + '" y="' + cy + '" text-anchor="middle" dominant-baseline="middle" ' +
-            'font-family="Hind Siliguri, sans-serif" font-size="15" fill="#5b6b62">দৈর্ঘ্য ও প্রস্থ দিন</text>' +
+            'font-family="Hind Siliguri, sans-serif" font-size="15" fill="' + palMut + '">দৈর্ঘ্য ও প্রস্থ দিন</text>' +
         '</svg>';
       return;
     }
@@ -1083,16 +1168,16 @@
     plotPreview.innerHTML =
       '<svg viewBox="0 0 ' + VB_W + ' ' + VB_H + '" xmlns="http://www.w3.org/2000/svg">' +
         '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="14" ' +
-          'fill="#eaf3ec" stroke="#d97706" stroke-width="2"/>' +
+          'fill="' + palFill + '" stroke="#d97706" stroke-width="2"/>' +
         '<text x="' + cx + '" y="' + (y - 12) + '" text-anchor="middle" ' +
-          'font-family="Hind Siliguri, sans-serif" font-size="14" font-weight="600" fill="#14532d">দৈর্ঘ্য: ' + formatNumber(len) + ' ফুট</text>' +
+          'font-family="Hind Siliguri, sans-serif" font-size="14" font-weight="600" fill="' + palLab + '">দৈর্ঘ্য: ' + formatNumber(len) + ' ফুট</text>' +
         '<text x="' + (x - 14) + '" y="' + cy + '" text-anchor="middle" ' +
           'transform="rotate(-90 ' + (x - 14) + ' ' + cy + ')" ' +
-          'font-family="Hind Siliguri, sans-serif" font-size="14" font-weight="600" fill="#14532d">প্রস্থ: ' + formatNumber(wid) + ' ফুট</text>' +
+          'font-family="Hind Siliguri, sans-serif" font-size="14" font-weight="600" fill="' + palLab + '">প্রস্থ: ' + formatNumber(wid) + ' ফুট</text>' +
         '<text x="' + cx + '" y="' + (cy - 14) + '" text-anchor="middle" ' +
-          'font-family="Hind Siliguri, sans-serif" font-size="' + capSize + '" font-weight="600" fill="#5b6b62">মোট জমি</text>' +
+          'font-family="Hind Siliguri, sans-serif" font-size="' + capSize + '" font-weight="600" fill="' + palMut + '">মোট জমি</text>' +
         '<text x="' + cx + '" y="' + (cy + 12) + '" text-anchor="middle" ' +
-          'font-family="Hind Siliguri, sans-serif" font-size="' + valSize + '" font-weight="700" fill="#14532d">' + katha + ' কাঠা</text>' +
+          'font-family="Hind Siliguri, sans-serif" font-size="' + valSize + '" font-weight="700" fill="' + palLab + '">' + katha + ' কাঠা</text>' +
       '</svg>';
   }
 
@@ -1189,6 +1274,24 @@
   convValue.addEventListener('input', updateConverter);
   lenInput.addEventListener('input', updateArea);
   widInput.addEventListener('input', updateArea);
+
+  // --- Dark / normal mode toggle (top corner) ---
+  var themeToggle = document.getElementById('themeToggle');
+  function applyTheme(theme, save) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (save) { try { localStorage.setItem('jomi-theme', theme); } catch (e) {} }
+    var icon = themeToggle.querySelector('.tt-icon');
+    var label = themeToggle.querySelector('.tt-label');
+    if (icon) icon.textContent = theme === 'dark' ? '\u2600\ufe0f' : '\uD83C\uDF19';
+    if (label) label.textContent = theme === 'dark' ? 'নরমাল মোড' : 'ডার্ক মোড';
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'নরমাল মোড চালু করুন' : 'ডার্ক মোড চালু করুন');
+    updateArea();
+  }
+  themeToggle.addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next, true);
+  });
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light', false);
 
   updateConverter();
   updateArea();
