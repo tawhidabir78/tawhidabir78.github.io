@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeadshotBD — Free Fire গাইড, টুলস ও টুর্নামেন্ট</title>
+<meta name="description" content="Free Fire গাইড, নিক নেম টুলস, স্কোয়াড রোল আর টুর্নামেন্ট নিউজ — সব এক জায়গায়। HeadshotBD একটি ফ্যান সাইট।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-lang="bn">
+<header class="site-header">
+<div class="wrap">
+<a class="brand" href="./" aria-label="HeadshotBD">
+<svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--accent)"/><circle cx="17" cy="17" r="4" fill="var(--accent)"/><path d="M17 1v7M17 26v7M1 17h7M26 17h7" stroke="var(--accent)" stroke-width="3"/></svg>
+<span>HEADSHOT<b>BD</b></span>
+</a>
+<nav class="nav" aria-label="Main">
+<ul>
+<li><a href="./#guides"><span data-l="bn">গাইড</span><span data-l="en">Guides</span></a></li>
+<li><a href="./#tools"><span data-l="bn">টুলস</span><span data-l="en">Tools</span></a></li>
+<li><a href="tournaments.html"><span data-l="bn">টুর্নামেন্ট</span><span data-l="en">Tournaments</span></a></li>
+<li><a href="./#news"><span data-l="bn">নিউজ</span><span data-l="en">News</span></a></li>
+</ul>
+<button type="button" id="hbd-lang" class="pill" aria-label="Change language"><span data-l="bn">English</span><span data-l="en">বাংলা</span></button>
+</nav>
+</div>
+</header>
+<main id="main">
+
+<section class="hero">
+<div class="wrap">
+<span class="tag"><span data-l="bn">FREE FIRE ফ্যান সাইট · বাংলাদেশ</span><span data-l="en">FREE FIRE FAN SITE · BANGLADESH</span></span>
+<h1><span data-l="bn">আপনার গেমপ্লে আরও ধারালো করুন</span><span data-l="en">Sharpen your gameplay</span></h1>
+<p><span data-l="bn">সেটিংস গাইড, ক্যারেক্টার টিপস, গেমিং টুলস, টুর্নামেন্ট আর সর্বশেষ আপডেট, সব এক জায়গায়।</span><span data-l="en">Settings guides, character tips, gaming tools, tournaments and the latest updates in one place.</span></p>
+<div class="row">
+<a class="btn" href="#tools"><span data-l="bn">টুলস ব্যবহার করুন</span><span data-l="en">Use the tools</span></a>
+<a class="btn btn-line" href="tournaments.html"><span data-l="bn">টুর্নামেন্ট দেখুন</span><span data-l="en">See tournaments</span></a>
+</div>
+</div>
+</section>
+
+<!-- GUIDES -->
+<section id="guides" class="sec">
+<div class="wrap">
+<div class="kicker"><span data-l="bn">গাইড</span><span data-l="en">Guides</span></div>
+<h2><span data-l="bn">জনপ্রিয় গাইড</span><span data-l="en">Popular guides</span></h2>
+<div class="grid">
+<p class="note"><span data-l="bn">এখনো কোনো গাইড যোগ হয়নি।</span><span data-l="en">No guides yet.</span></p>
+</div>
+</div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools" class="sec">
+<div class="wrap">
+<div class="kicker"><span data-l="bn">টুলস</span><span data-l="en">Tools</span></div>
+<h2><span data-l="bn">ফ্রি গেমিং টুলস</span><span data-l="en">Free gaming tools</span></h2>
+<div class="tabs">
+<button type="button" class="pill on" data-tool="nick"><span data-l="bn">নিক নেম জেনারেটর</span><span data-l="en">Nickname generator</span></button>
+<button type="button" class="pill" data-tool="role"><span data-l="bn">স্কোয়াড রোল</span><span data-l="en">Squad roles</span></button>
+</div>
+<div class="tool-box">
+<div id="tool-nick">
+<label class="lbl" for="hbd-nick"><span data-l="bn">আপনার নাম বা শব্দ লিখুন</span><span data-l="en">Type your name or a word</span></label>
+<div class="field">
+<input id="hbd-nick" type="text" maxlength="14" placeholder="Rakib" autocomplete="off">
+<button type="button" id="hbd-nick-go" class="btn"><span data-l="bn">নাম তৈরি করুন</span><span data-l="en">Generate names</span></button>
+</div>
+<div id="hbd-nick-out"></div>
+<p class="note"><span data-l="bn">নামে ক্লিক করলে কপি হবে। ফন্ট স্টাইল শুধু ইংরেজি অক্ষরে কাজ করে। গেম সব সিম্বল সাপোর্ট নাও করতে পারে।</span><span data-l="en">Click a name to copy it. Font styles work on English letters only. The game may not support every symbol.</span></p>
+</div>
+<div id="tool-role" hidden>
+<p style="color:var(--muted);font-size:17px;margin:0 0 20px"><span data-l="bn">স্কোয়াডে কে কোন রোলে খেলবে ঠিক করতে বাটন চাপুন।</span><span data-l="en">Press the button to assign random roles to your squad.</span></p>
+<div class="roles" id="hbd-roles"></div>
+<button type="button" id="hbd-role-go" class="btn" style="margin-top:24px"><span data-l="bn">আবার শাফল করুন</span><span data-l="en">Shuffle again</span></button>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TOURNAMENTS -->
+<section id="tournaments" class="sec">
+<div class="wrap">
+<div class="kicker"><span data-l="bn">টুর্নামেন্ট</span><span data-l="en">Tournaments</span></div>
+<h2><span data-l="bn">টুর্নামেন্ট নিউজ</span><span data-l="en">Tournament news</span></h2>
+<p class="sub"><span data-l="bn">কোথায় ফ্রি আর কোথায় পেইড টুর্নামেন্ট হচ্ছে, এক জায়গায়।</span><span data-l="en">Where free and paid tournaments are happening, in one place.</span></p>
+<div class="tabs">
+<button type="button" class="pill on" data-filter="all" aria-pressed="true"><span data-l="bn">সব</span><span data-l="en">All</span></button>
+<button type="button" class="pill" data-filter="free" aria-pressed="false"><span data-l="bn">ফ্রি</span><span data-l="en">Free</span></button>
+<button type="button" class="pill" data-filter="paid" aria-pressed="false"><span data-l="bn">পেইড</span><span data-l="en">Paid</span></button>
+</div>
+<div class="t-list">
+<p class="note"><span data-l="bn">এখনো কোনো টুর্নামেন্ট নেই।</span><span data-l="en">No tournaments yet.</span></p>
+</div>
+<p style="margin-top:20px"><a class="btn btn-line" href="tournaments.html"><span data-l="bn">সব টুর্নামেন্ট</span><span data-l="en">All tournaments</span></a></p>
+<p class="note"><span data-l="bn">সতর্কতা: পেইড টুর্নামেন্টে টাকা দেওয়ার আগে আয়োজকের পরিচয়, আগের রেজাল্ট ও পেমেন্ট প্রমাণ যাচাই করুন।</span><span data-l="en">Warning: before paying for a paid tournament, verify the organizer, past results and payment proof.</span></p>
+</div>
+</section>
+
+<!-- NEWS -->
+<div class="band" id="news">
+<section class="sec">
+<div class="wrap">
+<div class="kicker"><span data-l="bn">নিউজ</span><span data-l="en">News</span></div>
+<h2><span data-l="bn">সর্বশেষ আপডেট</span><span data-l="en">Latest updates</span></h2>
+<div class="grid">
+<p class="note"><span data-l="bn">এখনো কোনো নিউজ পোস্ট হয়নি।</span><span data-l="en">No news yet.</span></p>
+</div>
+</div>
+</section>
+</div>
+
+<!-- JOIN -->
+<section class="join">
+<div class="wrap">
+<div style="flex:1 1 380px">
+<h2><span data-l="bn">কমিউনিটিতে যোগ দিন</span><span data-l="en">Join the community</span></h2>
+<p><span data-l="bn">নতুন গাইড, টুর্নামেন্ট ও আপডেট সবার আগে পেতে আমাদের গ্রুপে থাকুন।</span><span data-l="en">Stay in our group to get new guides, tournaments and updates first.</span></p>
+</div>
+</div>
+</section>
+
+</main>
+<footer class="site-footer">
+<div class="wrap">
+<div>
+<div>&copy; 2026 HeadshotBD</div>
+<div style="margin-top:6px;max-width:560px"><span data-l="bn">HeadshotBD একটি ফ্যান সাইট। Free Fire Garena-র ট্রেডমার্ক, এই সাইট Garena-র সাথে সম্পর্কিত বা অনুমোদিত নয়।</span><span data-l="en">HeadshotBD is a fan site. Free Fire is a trademark of Garena. This site is not affiliated with or endorsed by Garena.</span></div>
+</div>
+<ul>
+<li><a href="tournaments.html"><span data-l="bn">টুর্নামেন্ট</span><span data-l="en">Tournaments</span></a></li>
+</ul>
+</div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
